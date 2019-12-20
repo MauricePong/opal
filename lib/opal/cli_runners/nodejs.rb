@@ -12,7 +12,13 @@ module Opal
         (data[:options] ||= {})[:env] = { 'NODE_PATH' => node_modules }
 
         SystemRunner.call(data) do |tempfile|
-          ['node', tempfile.path, *data[:argv]]
+          [
+            'node',
+            '--require', "#{__dir__}/source-map-support",
+            tempfile.path,
+            '--',
+            *data[:argv]
+          ]
         end
       rescue Errno::ENOENT
         raise MissingNodeJS, 'Please install Node.js to be able to run Opal scripts.'
