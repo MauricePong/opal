@@ -13,6 +13,11 @@ Whitespace conventions:
 - Use magic-comments to declare helpers required by the file (#2038)
 - `Opal.$$` is now a shortcut for `Opal.const_get_relative` (#2038)
 - `Opal.$$$` is now a shortcut for `Opal.const_get_qualified` (#2038)
+- `Opal::Compiler#magic_comments` that allows to access magic-comments format and converts it to a hash
+- Use magic-comments to declare helpers required by the file
+- `Opal.$$` is now a shortcut for `Opal.const_get_relative`
+- `Opal.$$$` is now a shortcut for `Opal.const_get_qualified`
+- Source-map support for Node.js in the default runner (#2045)
 
 
 ### Fixed
@@ -38,7 +43,7 @@ Whitespace conventions:
 - Struct#dup not copying `$$data` (#1995)
 - Fixed usage of semicolon in single-line backticks (#2004)
 - Module#attr with multiple arguments (#2003)
-- `PathReader` used to try to read missing files instead of respecting the `missing_require_severity` configuration value (#2044) 
+- `PathReader` used to try to read missing files instead of respecting the `missing_require_severity` configuration value (#2044)
 
 
 ### Changed
@@ -47,5 +52,11 @@ Whitespace conventions:
 - Nashorn has been deprecated but GraalVM still supports it (#1997)
 - "opal/mini" now includes "opal/io" (#2002)
 - Regexps assigned to constants are now frozen (#2007)
-- `Opal.$$` changed from being the constant cache of Object to being a shortcut
-  for `Opal.const_get_relative` (#2038)
+- `Opal.$$` changed from being the constant cache of Object to being a shortcut for `Opal.const_get_relative` (#2038)
+
+
+### Deprecated
+
+- Requiring nodejs/stacktrace has been deprecated, source-maps are already
+  supported by the default Node.js runner or by requiring https://github.com/evanw/node-source-map-support
+  before loading code compiled by Opal (#2045)
