@@ -17,7 +17,8 @@ branches:
     - /.*/ci-check/
 
 install:
-  - git submodule update --init --depth 10
+  # - git submodule update --init --depth 10
+  - ruby bin/git-submodule-fast-install
   # Take default Ruby out of path
   - SET PATH=%PATH:C:\Ruby193\bin;=%
   # Add Ruby to path from build matrix

@@ -1,0 +1,81 @@
+#!/usr/bin/env ruby
+
+def system!(*args)
+  system(*args) or raise "command failed: #{args.inspect}"
+end
+
+
+Dir.chdir "#{__dir__}/.."
+Dir.mkdir 'tmp' unless File.directory? 'tmp'
+$stdout = File.open "tmp/#{File.basename $0}.log", 'w'
+
+system 'git submodule --quiet deinit --all -f 2> /dev/null'
+
+modules = {}
+`git config -f #{__dir__}/../.gitmodules --list`.lines.each do |line|
+  p line
+  fullkey, value = line.split('=', 2)
+  _, name, key = fullkey.split('.', 3)
+  modules[name] ||= {}
+  modules[name][key.to_sym] = value.strip
+end
+
+`git submodule`.lines.each do |line|
+  p line
+  sha1, name = line[1..-1].scan(/^(?<sha1>\w+) (?<name>\S+)/).first
+  modules[name][:sha1] = sha1
+end
+
+modules.map do |name, config|
+  STDOUT.puts "Installing #{name}..."
+  url, sha1, path = config.values_at(:url, :sha1, :path)
+  dir = File.dirname(path)
+  Thread.new do
+    system! "wget --quiet #{url.sub(/\.git$/, '')}/archive/#{sha1}.zip"
+
+    system! "unzip -q #{sha1}.zip -d #{dir}"
+    system! "rm #{sha1}.zip"
+
+    system! "rm -rf #{path}" if File.directory? path
+    system! "mv #{dir}/*-#{sha1} #{path}"
+    STDOUT.print "Completed installing #{name}.\n"
+  end
+end.each(&:join)
+
+system! 'git submodule init'
+
+# for line in .lines
+#   # url =
+#   # myurl=$(grep -A2 -Pi "path = $mysub" .gitmodules | grep -Pio '(?<=url =).*/[^.]+')
+#   # mydir=$(dirname $mysub)
+#   # wget $myurl/archive/$mysha.zip
+#   # unzip $mysha.zip -d $mydir
+#   # test -d $mysub && rm -rf $mysub
+#   # mv $mydir/*-$mysha $mysub
+#   # rm $mysha.zip
+#   #
+# end
+# #
+# # urls = File.read("#{__dir__}/../.gitmodules").split(/^\[submodule "/).map do |data|
+# #   next if data.empty?
+# #   name, values = data.split("\"]\n", 2)
+# #   {name => Hash[values.scan(/(?<key>\w+) = (?<value>.*)\n/)]}
+# # end.compact
+# # p urls
+# #
+# # for value in `git submodule`.gsub(/.*(\w{40})\s([^\s]+).*/, '\1:\2').lines
+# #   sha1, path = value.split(':', 2)
+# #   p sha1 => path
+# #   # url = File.read('.gitmodules').lines.grep("")""$(grep -A2 -Pi "path = $mysub" .gitmodules | grep -Pio '(?<=url =).*/[^.]+')
+# # end
+# #   mysha=${value%:*}
+# #   mysub=${value#*:}
+# #   myurl=$(grep -A2 -Pi "path = $mysub" .gitmodules | grep -Pio '(?<=url =).*/[^.]+')
+# #   mydir=$(dirname $mysub)
+# #   wget $myurl/archive/$mysha.zip
+# #   unzip $mysha.zip -d $mydir
+# #   test -d $mysub && rm -rf $mysub
+# #   mv $mydir/*-$mysha $mysub
+# #   rm $mysha.zip
+# # done
+# # git submodule init

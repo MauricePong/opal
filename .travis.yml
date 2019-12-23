@@ -91,7 +91,7 @@ matrix:
 before_install:
   # Keep track of which version of node we're running the specs against
   - node -v
-  - git submodule update --init --depth 10
+  - bin/git-submodule-fast-install
   - npm install -g jshint
   - npm install -g uglify-js
   - bundle config without doc
