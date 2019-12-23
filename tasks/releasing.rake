@@ -82,3 +82,4 @@ task :changelog do
 
   File.write changelog_path, changelog_entries.join("\n\n\n\n\n")
 end
+
